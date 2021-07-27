@@ -10,7 +10,9 @@ function Barreira(reversa = false) {
     this.elemento = novoElemento('div', 'barreira')
     const borda = novoElemento('div', 'borda')
     const corpo = novoElemento('div', 'corpo')
-    // Nessa parte verifica o que vem primeiro do cano(que é a barreira), em cima e eem baixo o corpo ou a borda
+    // Nessa parte verifica o que vem primeiro do cano (ou seja barreira)
+    // A partir do parametro "reversa" se verfica se vai ser adicionado a DOM
+    // uma div de corpo ou borda do cano
     this.elemento.appendChild(reversa ? corpo : borda)
     this.elemento.appendChild(reversa ? borda : corpo)
 
@@ -18,11 +20,17 @@ function Barreira(reversa = false) {
 }
 
 function PardeBarreiras(altura, abertura, x) {
+    //O elemento par de barreiras envolve os dois canos tanto
+    //o de cima quanto o de baixo
     this.elemento = novoElemento('div', 'par-de-barreiras')
 
+    //Aqui se cria os dois canos tanto o superior quanto o inferior
+    //A partir de instancias da function barreira
     this.superior = new Barreira(true)
     this.inferior = new Barreira(false)
 
+    // O "this.elemento" é o lelemento da DOM
+    //então se adiciona tanto o superior quanto o inferior na DOM
     this.elemento.appendChild(this.superior.elemento)
     this.elemento.appendChild(this.inferior.elemento)
 
@@ -45,6 +53,10 @@ function PardeBarreiras(altura, abertura, x) {
 // document.querySelector('[wm-flappy]').appendChild(b.elemento)
 
 function Barreiras(altura, largura, abertura, espaco, notificarPonto) {
+
+    //Abaixo é criado um array com a instancia do par de barreiras
+    // E a primeira começa com a largura da tela do jogo, para
+    //o jogo iniciar de fora da tela, e os próximos team a adição do espaço entre elas
     this.pares = [
         new PardeBarreiras(altura, abertura, largura),
         new PardeBarreiras(altura, abertura, largura + espaco),
@@ -66,7 +78,10 @@ function Barreiras(altura, largura, abertura, espaco, notificarPonto) {
             const meio = largura / 2
             const cruzouOMeio = par.getX() + deslocamento >= meio && par.getX() < meio
 
-            if (cruzouOMeio) notificarPonto()
+            if (cruzouOMeio){
+                console.log('passei!')
+                notificarPonto()  
+            } 
         })
     }
 }
@@ -83,9 +98,19 @@ function Passaro(alturaJogo){
     window.onkeydown = e => voando = true
     window.onkeyup = e => voando = false
 
+
     this.animar = () => {
-        const novoY = this.getY() + (voando ? 8 : -5)
-        const alturaMaxima = alturaJogo - this.elemento.clientHeight
+
+        let novoY;
+        if (voando) {
+            this.elemento.src = 'imgs/passaro_voando.png'
+            novoY = this.getY() + 8
+        } else {
+            this.elemento.src = 'imgs/passaro.png'
+            novoY = this.getY() - 5
+        }
+        // const novoY = this.getY() + (voando ? 8 : -5)
+         const alturaMaxima = alturaJogo - this.elemento.clientHeight
 
         if(novoY <= 0){
             this.setY(0)
@@ -102,10 +127,9 @@ function Passaro(alturaJogo){
 
 function Progresso(){
     this.elemento = novoElemento('span', 'progresso')
-    this.atualizaPontos = pontos => {
-        this.elemento.innerHTML = pontos
-    }
-    this.atualizaPontos(0)
+    this.atualizaPontos = pontos => this.elemento.innerHTML = pontos
+
+     this.atualizaPontos(0)
 }
 
 function estaoSobrepostos(elementoA, elementoB){
@@ -144,7 +168,7 @@ function FlappyBird(){
 
     const progresso = new Progresso()
     const barreiras = new Barreiras(altura, largura, 200, 400,
-        () => progresso.atualizarPontos(++pontos))
+        () => progresso.atualizaPontos(++pontos))
     const passaro = new Passaro(altura)
 
     areaDoJogo.appendChild(progresso.elemento)
